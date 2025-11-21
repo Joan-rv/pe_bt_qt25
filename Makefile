@@ -1,7 +1,13 @@
 CXX:=g++
 CXXFLAGS:=-Wall -Wextra
 
-OBJ=main.o
+OBJ:=main.o
+BIN:=recollir_dades
 
-recollir_dades: $(OBJ)
+$(BIN): $(OBJ)
 	$(CXX) $(CXXFLAGS) -o $@ $^
+
+.PHONY: clean
+
+clean:
+	rm -f $(OBJ) $(BIN)
