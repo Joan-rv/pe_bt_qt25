@@ -46,11 +46,11 @@ class Timer {
     void reset() { start_ = std::chrono::steady_clock::now(); }
 
     /*
-     * Number of seconds elapsed as `double`
+     * Number of milliseconds elapsed as `double`
      */
     double elapsed() const {
         auto now = std::chrono::steady_clock::now();
-        return std::chrono::duration<double>(now - start_).count();
+        return std::chrono::duration<double, std::milli>(now - start_).count();
     }
 
   private:
