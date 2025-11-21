@@ -23,6 +23,14 @@ class Graph {
         adjacency_list_[v].push_back(u);
     }
     int order() const { return adjacency_list_.size(); }
+    int size() const {
+        int degree_sum = 0;
+        for (auto edges : adjacency_list_)
+            degree_sum += edges.size();
+        // In an undirected graph, the sum of the degrees is twice the number of
+        // edges
+        return degree_sum / 2;
+    }
     std::vector<int> &operator[](int u) { return adjacency_list_[u]; }
     const std::vector<int> &operator[](int u) const {
         return adjacency_list_[u];
@@ -36,6 +44,7 @@ class Timer {
   public:
     Timer() : start_(std::chrono::steady_clock::now()) {}
     void reset() { start_ = std::chrono::steady_clock::now(); }
+
     /*
      * Number of seconds elapsed as `double`
      */
@@ -108,15 +117,38 @@ int num_cc_bfs(const Graph &g) {
     return num_cc;
 }
 
+enum class Algorithm {
+    NumCC = 0,
+};
+
+struct Observation {
+    double dfs_time;
+    double bfs_time;
+    Algorithm algorithm;
+    int num_vertices;
+    int num_edges;
+
+    static void write_csv_header(std::ostream &os) {
+        os << "dfs_time;bfs_time;algorithm;num_vertices;num_edges\n";
+    }
+    void write_csv(std::ostream &os) {
+        os << dfs_time << ';' << bfs_time << ';' << static_cast<int>(algorithm)
+           << ';' << num_vertices << ';' << num_edges << '\n';
+    }
+};
+
 int main() {
-    for (int sample = 0; sample < 100; ++sample) {
+    Observation::write_csv_header(std::cout);
+    for (int sample = 0; sample < 1000; ++sample) {
         int n = rand_uniform(500, 1000);
         auto g = rand_graph(n);
         Timer t;
-        std::cout << num_cc_dfs(g) << '\n';
-        std::cerr << "Dfs took " << t.elapsed() << " seconds\n";
+        num_cc_dfs(g);
+        double dfs_time = t.elapsed();
         t.reset();
-        std::cout << num_cc_dfs(g) << '\n';
-        std::cerr << "Bfs took " << t.elapsed() << " seconds\n";
+        num_cc_dfs(g);
+        double bfs_time = t.elapsed();
+        Observation{dfs_time, bfs_time, Algorithm::NumCC, g.order(), g.size()}
+            .write_csv(std::cout);
     }
 }
