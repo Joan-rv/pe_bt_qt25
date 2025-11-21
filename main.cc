@@ -64,7 +64,7 @@ Graph rand_graph(int n) {
     Graph g(n);
     for (int i = 0; i < n; ++i) {
         for (int j = i + 1; j < n; ++j) {
-            if (rand_uniform(0, n) == 0)
+            if (rand_uniform(0, 1) == 0)
                 g.add_edge(i, j);
         }
     }
@@ -141,7 +141,8 @@ struct Observation {
 
 int main() {
     Observation::write_csv_header(std::cout);
-    for (int sample = 0; sample < 1000; ++sample) {
+    constexpr int num_samples = 1000;
+    for (int sample = 0; sample < num_samples; ++sample) {
         int n = rand_uniform(500, 1000);
         auto g = rand_graph(n);
         Timer t;
@@ -152,5 +153,7 @@ int main() {
         double bfs_time = t.elapsed();
         Observation{dfs_time, bfs_time, Algorithm::NumCC, g.order(), g.size()}
             .write_csv(std::cout);
+        std::cerr << "\rProgress: " << sample << '/' << num_samples;
     }
+    std::cerr << std::endl;
 }
