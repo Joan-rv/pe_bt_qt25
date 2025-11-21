@@ -64,7 +64,7 @@ Graph rand_graph(int n) {
     Graph g(n);
     for (int i = 0; i < n; ++i) {
         for (int j = i + 1; j < n; ++j) {
-            if (rand_uniform(0, 1) == 0)
+            if (rand_uniform(0, n) == 0)
                 g.add_edge(i, j);
         }
     }
@@ -99,6 +99,8 @@ void num_cc_bfs(const Graph &g, std::vector<bool> &vis, int u) {
     while (!bfs.empty()) {
         int u = bfs.front();
         bfs.pop();
+        if (vis[u])
+            continue;
         vis[u] = true;
         for (auto v : g[u])
             bfs.push(v);
@@ -146,7 +148,7 @@ int main() {
         num_cc_dfs(g);
         double dfs_time = t.elapsed();
         t.reset();
-        num_cc_dfs(g);
+        num_cc_bfs(g);
         double bfs_time = t.elapsed();
         Observation{dfs_time, bfs_time, Algorithm::NumCC, g.order(), g.size()}
             .write_csv(std::cout);
