@@ -1,8 +1,30 @@
 #include <chrono>
+#include <fstream>
 #include <iostream>
 #include <queue>
 #include <random>
 #include <stdexcept>
+
+#include <sys/sysinfo.h>
+
+unsigned long get_total_ram() {
+    struct sysinfo i;
+    sysinfo(&i);
+    return i.totalram;
+}
+
+std::string get_cpu_model() {
+    std::ifstream cpu("/proc/cpuinfo");
+    cpu.exceptions(std::ios::failbit | std::ios::badbit);
+    std::string line;
+    while (std::getline(cpu, line)) {
+        if (line.rfind("model name", 0) == 0) {
+            // line begins with "model name"
+            return line.substr(line.find(':') + 2);
+        }
+    }
+    throw std::runtime_error("could not find CPU model name");
+}
 
 thread_local std::mt19937 rng{std::random_device()()};
 
@@ -131,15 +153,20 @@ struct Observation {
     int num_edges;
 
     static void write_csv_header(std::ostream &os) {
-        os << "dfs_time;bfs_time;algorithm;num_vertices;num_edges\n";
+        os << "dfs_time;bfs_time;algorithm;num_vertices;num_edges;total_ram;"
+              "cpu_model\n";
     }
-    void write_csv(std::ostream &os) {
+    void write_csv(std::ostream &os, unsigned long total_ram,
+                   std::string cpu_model) {
         os << dfs_time << ';' << bfs_time << ';' << static_cast<int>(algorithm)
-           << ';' << num_vertices << ';' << num_edges << '\n';
+           << ';' << num_vertices << ';' << num_edges << ';' << total_ram << ';'
+           << cpu_model << '\n';
     }
 };
 
 int main() {
+    unsigned long total_ram = get_total_ram();
+    std::string cpu_model = get_cpu_model();
     Observation::write_csv_header(std::cout);
     constexpr int num_samples = 1000;
     for (int sample = 0; sample < num_samples; ++sample) {
@@ -152,7 +179,7 @@ int main() {
         num_cc_bfs(g);
         double bfs_time = t.elapsed();
         Observation{dfs_time, bfs_time, Algorithm::NumCC, g.order(), g.size()}
-            .write_csv(std::cout);
+            .write_csv(std::cout, total_ram, cpu_model);
         std::cerr << "\rProgress: " << sample << '/' << num_samples;
     }
     std::cerr << std::endl;
