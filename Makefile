@@ -1,5 +1,5 @@
 CXX:=g++
-CXXFLAGS:=-Wall -Wextra
+CXXFLAGS:=-Wall -Wextra -O3
 
 OBJ:=main.o
 BIN:=recollir_dades
