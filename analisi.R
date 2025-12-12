@@ -9,6 +9,7 @@ boxplot(bfs_time ~ algorithm, data=dades, ylim=eix_y)
 
 # dataframes separats
 d_numcc <- dades[dades$algorithm == "NumCC",]
+d_numcc <- subset(dades, algorithm == "NumCC")
 d_isbi <- dades[dades$algorithm == "IsBipartite",]
 
 
@@ -47,7 +48,7 @@ M1_dfs <- lm(log(dfs_time) ~ algorithm, data=dades)
 summary(M1_dfs)
 # Premises model:
 # m.a.s.
-# normalitat dins de cada grup -> no es dona
+# normalitat dins de cada grup -> sí
 # homoscedasticitat entre grups -> no es dona
 par(mfrow=c(2,2))
 plot(M1_dfs,c(2,1))          		        # QQ-Norm i Standard Residuals vs. Fitted
@@ -58,9 +59,31 @@ plot(rstandard(M1_dfs),type="l")	      # Ordre dels residus estandaritzats
 # m.a.s.
 # normalitat dins de cada grup -> no es dona
 # homoscedasticitat entre grups -> no es dona
-M2_bfs <- lm(log(bfs_time) ~ algorithm, data=dades)
-summary(M2_bfs)
+M1_bfs <- lm(log(bfs_time) ~ algorithm, data=dades)
+summary(M1_bfs)
 par(mfrow=c(2,2))
-plot(M1_dfs,c(2,1))          		        # QQ-Norm i Standard Residuals vs. Fitted
-hist(rstandard(M1_dfs),font.main=1)     # Histograma dels residus estandaritzats
-plot(rstandard(M1_dfs),type="l")	      # Ordre dels residus estandaritzats
+plot(M1_bfs,c(2,1))          		        # QQ-Norm i Standard Residuals vs. Fitted
+hist(rstandard(M1_bfs),font.main=1)     # Histograma dels residus estandaritzats
+plot(rstandard(M1_bfs),type="l")	      # Ordre dels residus estandaritzats
+
+M2_dfs <- lm(log(dfs_time) ~ num_vertices + num_edges + cpu_model, data=d_numcc)
+summary(M2_dfs)
+# normalitat residus: sí, però al final no
+# homoscedasticitat: sí
+# linealitat: sí
+# independència: sí
+par(mfrow=c(2,2))
+plot(M2_dfs,c(2,1))          		        # QQ-Norm i Standard Residuals vs. Fitted
+hist(rstandard(M2_dfs),font.main=1)     # Histograma dels residus estandaritzats
+plot(rstandard(M2_dfs),type="l")	      # Ordre dels residus estandaritzats
+
+M2_bfs <- lm(log(bfs_time) ~ num_vertices + num_edges + cpu_model, data=d_numcc)
+summary(M2_bfs)
+# normalitat residus: sí, però al final no
+# homoscedasticitat: sí
+# linealitat: sí
+# independència: sí
+par(mfrow=c(2,2))
+plot(M2_bfs,c(2,1))          		        # QQ-Norm i Standard Residuals vs. Fitted
+hist(rstandard(M2_bfs),font.main=1)     # Histograma dels residus estandaritzats
+plot(rstandard(M2_bfs),type="l")	      # Ordre dels residus estandaritzats
